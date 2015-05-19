@@ -7,7 +7,7 @@ The main basis for comparing the manuscripts are the individual important featur
 
 ## [App's Working Screenshot](https://db.tt/bbqWzHLZ)
 
-A lengthy blog post about the procedure I have followed and the idea behind is explained in available [here](http://blog.rajeev-reddy.com/2015/05/18/ted-talks-similarity-index/)
+A lengthy blog post about the procedure I have followed and the idea behind is available [here](http://blog.rajeev-reddy.com/2015/05/18/ted-talks-similarity-index/)
 
 ### Note: To run this app locally you need to have installed scipy, numpy, scikit, nltk (with its data) installed
 
