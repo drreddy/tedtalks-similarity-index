@@ -1,0 +1,251 @@
+<!DOCTYPE HTML5>
+<html>
+   <head>
+      <title>TED Similarity Index</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.2/lumen/bootstrap.min.css" media="screen">
+   </head>
+<body style="background-color: #e9f0f5;">
+    <div class="jumbotron" style="color: white; background-color: #303e49; margin-bottom:15px; padding:10px 0px;">
+        <div class="container" style="text-align:center;">
+            <h1>TED Similarity Index <sub style="font-size: 18px; opacity: 0.5; color: lightgrey;">An application comparing TED talks for similarities using NLP</sub></h1>
+        </div>
+    </div>
+    <div class="container well" style="text-align:center;">
+        <div class="form-group">
+            <div class="col-lg-11">
+                <select id="tags" name="tags" multiple>
+                </select>
+            </div>
+            <div class="col-lg-1">
+                <button id="searchBut" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-lg-offset-4 compareCont" style="padding-bottom:10px; display:none;">
+        <button type="button" class="btn btn-primary btn-lg btn-block compBut">Compare</button>
+    </div>
+    <div class="talksContainer col-lg-12" style="height:300px; overflow-y:auto;">
+        
+    </div>
+<!--     <footer class="col-lg-10 col-lg-offset-1" style="position:absolute; bottom:0px; margin-bottom:5px; padding: 15px 15px 5px 15px;">
+        <div class="row">
+            <div class="col-lg-12">
+                <ul class="list-unstyled">
+                    <li class="pull-right">Made by <a href="http://rajeev-reddy.com" rel="nofollow">Rajeev Reddy</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+                
+            </div>
+        </div>
+    </footer> -->
+</body>
+</html>
+<div id="compResp" class="modal fade" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+                <h4 class="modal-title">Similarity Comparision Details</h4>
+            </div>
+            <div class="modal-body">
+                <!-- <pre id="json"></pre> -->
+            </div>
+        </div>
+    </div>
+</div>
+<div id="moreInfoModal" class="modal fade" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <p class="well">
+
+                </p>
+                <!-- <pre id="json"></pre> -->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.min.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+<style>
+.selectize-input{
+/*   width: 100% !important; */
+    text-align:left;
+}
+.selectize-input > input{
+/*   width: 100% !important; */
+    font-size:15px;
+}
+.selectize-dropdown-content > div {
+  text-align:left;
+  width: 100% !important;
+  font-size: 14px;
+}
+.lead{
+    font-weight:900;
+    text-align:justify;
+}
+.modal-backdrop{
+    height:100%;
+    z-index: 1000;
+}
+.moreInfo{
+    float:right;
+}
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/sockjs-client/0.3.4/sockjs.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.min.js"></script>
+<script src="{{static_url('js/tagsHTML.js')}}"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script>
+    tags = []
+    
+    $(document).ready(function(){
+        
+        $('#tags').html(optionsVar);
+        
+        $('#tags').selectize({
+            plugins: ['remove_button'],
+            onChange: function(value) {
+               tags = value
+               // console.log(tags)
+            }
+        });
+        
+        var conn;
+        var reconnect = true;
+        
+        connect = function() {  
+            
+            conn = new SockJS(window.location.protocol + '//' + window.location.host + '/wsconn');
+
+            conn.onopen = function() {
+                console.log('Connected.');
+            };
+
+            conn.onmessage = function(e) {
+                // console.log(e.data)
+
+                i = 0;
+
+                if (e.data['type'] === "compare"){
+                    // $('.modal-body #json').html(JSON.stringify(e.data, undefined, 2))
+                    $(".compBut").attr("disabled",false);
+
+                    MainTalk = $("input[data-tedid='" + e.data['data']['mainId'] + "']").siblings('p.lead').text()
+
+                    var htmlVar="";
+
+                    htmlVar += "<p class='lead'><a href='" + $("input[data-tedid='" + e.data['data']['mainId'] + "']").siblings('p.info').attr('data-url') + "' target='none'>" + MainTalk + "</a></p>";
+
+                    htmlVar += "<table class=\"table table-striped table-hover \">";
+                    htmlVar += "  <thead>";
+                    htmlVar += "    <tr>";
+                    htmlVar += "      <th>Name<\/th>";
+                    htmlVar += "      <th>Similarity<\/th>";
+                    htmlVar += "    <\/tr>";
+                    htmlVar += "  <\/thead>";
+                    htmlVar += "  <tbody>";
+
+                    for(var x in e.data['data']['results']){
+                        htmlVar += "    <tr>";
+                        htmlVar += "      <td> <a href=" + $("input[data-tedid='" + x + "']").siblings('p.info').attr('data-url') + " > " + $("input[data-tedid='" + x + "']").siblings('p.lead').text() + " </a></td>";
+                        htmlVar += "      <td>" + e.data['data']['results'][x] + "<\/td>";
+                        htmlVar += "    <\/tr>";
+                    }
+
+                    htmlVar += "  <\/tbody>";
+                    htmlVar += "<\/table>";
+
+                    $('#compResp .modal-body').html(htmlVar);
+
+                    $( "input[type='checkbox']:checked" ).attr("checked",false)    
+                }else if(e.data['type'] === "search"){
+                    var htmlStr = "";
+                    for(var x in e.data['data']){
+
+                        if (x%4 == 0){
+                            htmlStr += "<div class='row'>"
+                        }
+
+                        htmlStr += '<div class=\"col-lg-3\">';
+                        htmlStr += '    <div class=\"well col-lg-12\">';
+                        htmlStr += '        <p class=\"lead\"><a href="' + e.data['data'][x]['url'] + '" target="none">' + e.data['data'][x]['title'] + '</a></p>';
+                        htmlStr += '        <p class="info" style="text-align:right" data-tedid="' + e.data['data'][x]['tedid'] + '" data-speakername="' + e.data['data'][x]['speaker'] + '" data-url="' + e.data['data'][x]['url'] + '"/> By ' + e.data['data'][x]['speaker'] + ' </p>';
+                        htmlStr += '        <div class="desc" style="display:none;" data-tedid="' + e.data['data'][x]['tedid'] + '">' + e.data['data'][x]['desc'].replace("'",'"') + '</div>'
+                        htmlStr += '        <input type=\"checkbox\" data-tedid=\"' + e.data['data'][x]['tedid'] + '\" \/> Click to compare';
+                        htmlStr += '        <button class="btn btn-info btn-sm moreInfo" data-tedid="' + e.data['data'][x]['tedid'] + '"> More Info </button>';
+                        htmlStr += '    <\/div>';
+                        htmlStr += '<\/div>';
+
+                        i += 1;
+
+                        if (i == 4){
+                            i = 0;
+                            htmlStr += "</div>"
+                        }
+                    }
+
+                    if (i != 0){
+                        htmlStr += "</div>"   
+                    }
+                    $(".talksContainer").html(htmlStr);
+                }
+            };
+
+            conn.onclose = function() {
+                console.log('Disconnected.');
+                if (reconnect){ 
+                    connect(); 
+                }
+            };    
+        }
+        
+        connect();
+        
+        $(".talksContainer").on("click", "input[type='checkbox']", function(){
+            num = $( "input[type='checkbox']:checked" ).length
+            if (num > 0){
+                $(".compareCont").slideDown()
+            }else{
+                $(".compareCont").slideUp()
+            }
+        })
+
+        $(".talksContainer").on("click", "button.moreInfo", function(){
+            tedid = $(this).attr('data-tedid');
+            $('#moreInfoModal .modal-header .modal-title').html("<a href='" + $(this).siblings('p.info').attr("data-url") + "' target='none'>" + $(this).siblings('p.lead').text() + "</a>");
+            $('#moreInfoModal .modal-body p.well').text($(this).siblings('.desc').text());
+            $('#moreInfoModal').modal();
+        })
+        
+        $("#searchBut").on('click',function(){
+            tagsString = tags.join(",")
+            // alert(tagsString)
+            conn.send("search--" + tagsString);
+        })
+        
+        heightVal = $(window).height() - $(".talksContainer").offset().top - 67;
+
+        $(".talksContainer").height(heightVal)
+        
+        $(".compBut").on("click",function(){
+            dataIds = []
+            $( "input[type='checkbox']:checked" ).each(function(index){
+                dataIds.push($(this).attr('data-tedid'))
+            })
+            // console.log(dataIds)
+            $(".compBut").attr("disabled",true);
+            $('#compResp').modal();
+            conn.send("compare--" + dataIds.join(","));
+        });
+        
+        // setTimeout(function(){ $(".talksContainer").html(htmlTest); }, 5000);
+    });
+</script>
