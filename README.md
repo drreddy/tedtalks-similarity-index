@@ -1,9 +1,9 @@
 Ted Similarity Index
 ==
 
-> This is just a proof of concept app. I believe a ted talk is nothing but a text manuscript of content. We can actually use the manuscripts of ted talks to compare them using nlp and then use the comparision score as a metric. So with this idea, I have created this proof of concept [app](http://ted-sim-index.rajeev-reddy.com/).
+> This is just a proof of concept app. I believe a ted talk's context can be broken down using nothing but the text presnet in the subtitles . We can actually use the subtitles of ted talks to compare them using nlp and then use the comparision score as a metric. So with this idea, I have created this proof of concept [app](http://ted-sim-index.rajeev-reddy.com/).
 
-The main basis for comparing the manuscripts are the individual important features present in the manuscripts.
+The main basis for comparing the subtitles are the individual important features present in the subtitles.
 
 ## [App's Working Screenshot](https://db.tt/bbqWzHLZ)
 
@@ -26,7 +26,7 @@ As I have mentioned this is just a proof of concept app many improvements can be
 2. Implement a CRON like service so that the data gets updated periodically.
 3. Feature extraction and processing can be improved.
 4. UI improvements and also Client side data validation.
-5. Better algorithms for comparing the manuscripts.
+5. Better algorithms for comparing the subtitles.
 
 Finally coming to technical parts of the app, The app is made of:
 
@@ -35,5 +35,5 @@ Finally coming to technical parts of the app, The app is made of:
 3. sockjs-client
 4. nltk
 5. scikit
-6. elasticsearch
+6. Elasticsearch
 7. Bootswatch Lumen Template (with some customization)
